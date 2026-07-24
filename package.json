@@ -1,0 +1,57 @@
+{
+  "name": "class-binary-codec",
+  "version": "0.1.0",
+  "description": "Dependency-free fixed-layout binary serialization for decorated TypeScript classes.",
+  "keywords": [
+    "binary",
+    "codec",
+    "decorator",
+    "serialization",
+    "typescript"
+  ],
+  "license": "MIT",
+  "author": "Nam Duong Duc <work@namdd.dev>",
+  "type": "module",
+  "main": "./lib/index.cjs",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/index.d.ts",
+        "default": "./lib/index.js"
+      },
+      "require": {
+        "types": "./lib/index.d.cts",
+        "default": "./lib/index.cjs"
+      },
+      "default": "./lib/index.js"
+    }
+  },
+  "files": [
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18.14"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup index.ts --format esm,cjs --dts --clean --sourcemap --out-dir lib",
+    "check": "npm run typecheck && npm test && npm run build",
+    "prepack": "npm run check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  }
+}

@@ -7,8 +7,21 @@
     "codec",
     "decorator",
     "serialization",
-    "typescript"
+    "typescript",
+    "buffer",
+    "fixed-layout",
+    "cursor",
+    "base64url",
+    "zero-dependency"
   ],
+  "homepage": "https://github.com/ddnam99/class-binary-codec#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddnam99/class-binary-codec.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ddnam99/class-binary-codec/issues"
+  },
   "license": "MIT",
   "author": "Nam Duong Duc <work@namdd.dev>",
   "type": "module",

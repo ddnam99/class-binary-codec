@@ -1,6 +1,6 @@
 {
   "name": "class-binary-codec",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Dependency-free fixed-layout binary serialization for decorated TypeScript classes.",
   "keywords": [
     "binary",
@@ -48,13 +48,13 @@
   ],
   "sideEffects": false,
   "engines": {
-    "node": ">=18.14"
+    "node": ">=20.0.0"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "tsup index.ts --format esm,cjs --dts --clean --sourcemap --out-dir lib",
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean --sourcemap --out-dir lib",
     "check": "npm run typecheck && npm test && npm run build",
     "prepack": "npm run check",
     "test": "vitest run",

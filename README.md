@@ -18,7 +18,7 @@ are required. Use a compression library for large or arbitrary data.
 npm install class-binary-codec
 ```
 
-Requires Node.js 18.14 or newer.
+Requires Node.js 20.0.0 or newer.
 
 ## Usage
 
@@ -83,10 +83,10 @@ console.log(decoded.createdAt.toISOString());
 ## Run the example
 
 The complete runnable example is
-[`binary-codec-example.ts`](./binary-codec-example.ts):
+[`examples/binary-codec-example.ts`](./examples/binary-codec-example.ts):
 
 ```bash
-npx tsx binary-codec-example.ts
+npx tsx examples/binary-codec-example.ts
 ```
 
 The example registers the same property decorators as functions, for example
@@ -147,7 +147,7 @@ representation.
 ## Performance
 
 One local reference run of
-[`binary-codec-example.ts`](./binary-codec-example.ts) used 100,000 iterations
+[`examples/binary-codec-example.ts`](./examples/binary-codec-example.ts) used 100,000 iterations
 on Node.js 26.5.0 (`darwin/arm64`):
 
 | Operation | Throughput |

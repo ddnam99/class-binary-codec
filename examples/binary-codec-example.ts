@@ -8,7 +8,7 @@ import {
   decodeBinary,
   encodeBinary,
   encodeBinaryBase64Url,
-} from './index';
+} from '../src/index';
 
 const BENCHMARK_ITERATIONS = 100_000;
 const UUID = 'b84287c5-7f25-11f1-addc-7a0328b9b7d0';
@@ -99,10 +99,10 @@ console.log(
   `\nBenchmark (${BENCHMARK_ITERATIONS.toLocaleString('en-US')} iterations, Node ${process.versions.node}, ${process.platform}/${process.arch}):`,
 );
 benchmark('Binary encode', BENCHMARK_ITERATIONS, () => {
-  required(encodeBinary(payload, PageToken), 'Binary encoding');
+  encodeBinary(payload, PageToken);
 });
 benchmark('Binary decode', BENCHMARK_ITERATIONS, () => {
-  required(decodeBinary(encoded, PageToken), 'Binary decoding');
+  decodeBinary(encoded, PageToken);
 });
 benchmark('JSON stringify', BENCHMARK_ITERATIONS, () => {
   JSON.stringify(payload);

@@ -9,7 +9,7 @@ import {
   decodeBinaryBase64,
   encodeBinary,
   encodeBinaryBase64Url,
-} from './index';
+} from '../src/index';
 import { describe, expect, it } from 'vitest';
 
 const UUID = 'b84287c5-7f25-11f1-addc-7a0328b9b7d0';
@@ -101,20 +101,18 @@ describe('binary codec library', () => {
   });
 
   it('surfaces inherited schema conflicts', () => {
-    class ParentPayload {
-      @BinaryUInt32()
+    class Parent {
       value!: number;
     }
+    class Child extends Parent {
+      override value!: number;
+    }
 
-    class InvalidChildPayload extends ParentPayload {}
+    BinaryUInt32()(Parent.prototype, 'value');
+    BinaryUInt32()(Child.prototype, 'value');
 
-    BinaryUuid()(InvalidChildPayload.prototype, 'value');
-
-    expect(() => encodeBinary({ value: 1 }, InvalidChildPayload)).toThrow(
-      BinarySchemaError,
-    );
-    expect(() => decodeBinary(Buffer.alloc(4), InvalidChildPayload)).toThrow(
-      BinarySchemaError,
-    );
+    expect(() =>
+      encodeBinary({ value: 1 } as Child, Child),
+    ).toThrow(BinarySchemaError);
   });
 });

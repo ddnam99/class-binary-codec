@@ -119,6 +119,7 @@ function encodeUuid(value: BinaryRuntimeValue): Buffer | undefined {
 
 function encodeCompactString(value: BinaryRuntimeValue): Buffer | undefined {
   if (typeof value !== 'string') return undefined;
+  if (Buffer.byteLength(value) > 0xff) return undefined;
 
   const uuid = encodeUuid(value);
   if (uuid) {
@@ -136,8 +137,6 @@ function encodeCompactString(value: BinaryRuntimeValue): Buffer | undefined {
   }
 
   const stringBytes = Buffer.from(value, 'utf8');
-  if (stringBytes.length > 0xff) return undefined;
-
   return Buffer.concat([
     Buffer.from([CompactStringType.String, stringBytes.length]),
     stringBytes,

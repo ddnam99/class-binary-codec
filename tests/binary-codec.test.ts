@@ -10,7 +10,7 @@ import {
   encodeBinary,
   encodeBinaryBase64Url,
 } from '../src/index';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 const UUID = 'b84287c5-7f25-11f1-addc-7a0328b9b7d0';
 
@@ -114,5 +114,49 @@ describe('binary codec library', () => {
     expect(() =>
       encodeBinary({ value: 1 } as Child, Child),
     ).toThrow(BinarySchemaError);
+  });
+
+  it('rejects oversized compact strings before numeric conversion', () => {
+    class CompactPayload {
+      @BinaryCompactString()
+      value!: string;
+    }
+
+    const bigIntSpy = vi.spyOn(globalThis, 'BigInt');
+
+    try {
+      expect(
+        encodeBinary({ value: '1'.repeat(256) }, CompactPayload),
+      ).toBeUndefined();
+      expect(bigIntSpy).not.toHaveBeenCalled();
+
+      const valueAboveUInt64 = '18446744073709551616';
+      const encoded = encodeBinary({ value: valueAboveUInt64 }, CompactPayload);
+
+      expect(encoded).toHaveLength(2 + valueAboveUInt64.length);
+      expect(decodeBinary(encoded as Buffer, CompactPayload)?.value).toBe(
+        valueAboveUInt64,
+      );
+
+      const maxUtf8Value = `${'é'.repeat(127)}a`;
+      const maxUtf8Encoded = encodeBinary(
+        { value: maxUtf8Value },
+        CompactPayload,
+      );
+
+      expect(Buffer.byteLength(maxUtf8Value)).toBe(255);
+      expect(maxUtf8Encoded).toHaveLength(257);
+      expect(
+        decodeBinary(maxUtf8Encoded as Buffer, CompactPayload)?.value,
+      ).toBe(maxUtf8Value);
+
+      const oversizedUtf8Value = 'é'.repeat(128);
+      expect(Buffer.byteLength(oversizedUtf8Value)).toBe(256);
+      expect(
+        encodeBinary({ value: oversizedUtf8Value }, CompactPayload),
+      ).toBeUndefined();
+    } finally {
+      bigIntSpy.mockRestore();
+    }
   });
 });

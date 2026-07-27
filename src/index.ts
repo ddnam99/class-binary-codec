@@ -13,4 +13,4 @@ export {
   encodeBinaryBase64Url,
 } from './binary-codec';
 export { BinarySchemaError } from './binary-codec.error';
-export type { BinarySchema } from './binary-codec.types';
+export type { BinaryFieldOptions, BinarySchema } from './binary-codec.types';

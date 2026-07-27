@@ -131,8 +131,7 @@ representation.
   readers.
 - Schema classes must have a zero-argument constructor because decoding creates
   each result with `new schema()`.
-- Every decorated field is required. There is no representation for
-  `undefined`, `null`, optional fields, or arrays.
+- Every decorated field is required by default. Optional / nullable fields are supported by passing `{ nullable: true }` to field decorators (which adds a 1-byte presence flag `0x00` for null/undefined vs `0x01` + value when present).
 - There is no built-in magic prefix, schema identifier, version framing, or
   migration support. Add an external envelope when a payload needs versioning.
 - The general `BinaryCompactString` UTF-8 form is limited to 255 encoded bytes.

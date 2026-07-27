@@ -1,6 +1,7 @@
 import { BinarySchemaError } from './binary-codec.error';
 import {
   BinaryFieldMetadata,
+  BinaryFieldOptions,
   BinaryScalarFieldMetadata,
   BinarySchema,
 } from './binary-codec.types';
@@ -24,36 +25,45 @@ function registerBinaryField(
 
 function binaryScalarField(
   type: BinaryScalarFieldMetadata['type'],
+  options?: BinaryFieldOptions,
 ): PropertyDecorator {
   return (target, propertyKey) => {
-    registerBinaryField(target, { propertyKey, type });
+    registerBinaryField(target, {
+      propertyKey,
+      type,
+      ...(options?.nullable ? { nullable: true } : {}),
+    });
   };
 }
 
-export function BinaryUInt32(): PropertyDecorator {
-  return binaryScalarField('uint32');
+export function BinaryUInt32(options?: BinaryFieldOptions): PropertyDecorator {
+  return binaryScalarField('uint32', options);
 }
 
-export function BinaryDate(): PropertyDecorator {
-  return binaryScalarField('date');
+export function BinaryDate(options?: BinaryFieldOptions): PropertyDecorator {
+  return binaryScalarField('date', options);
 }
 
-export function BinaryUuid(): PropertyDecorator {
-  return binaryScalarField('uuid');
+export function BinaryUuid(options?: BinaryFieldOptions): PropertyDecorator {
+  return binaryScalarField('uuid', options);
 }
 
-export function BinaryCompactString(): PropertyDecorator {
-  return binaryScalarField('compactString');
+export function BinaryCompactString(
+  options?: BinaryFieldOptions,
+): PropertyDecorator {
+  return binaryScalarField('compactString', options);
 }
 
 export function BinaryObject<T extends object>(
   classFactory: () => BinarySchema<T>,
+  options?: BinaryFieldOptions,
 ): PropertyDecorator {
   return (target, propertyKey) => {
     registerBinaryField(target, {
       propertyKey,
       type: 'object',
       classFactory,
+      ...(options?.nullable ? { nullable: true } : {}),
     });
   };
 }

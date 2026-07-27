@@ -13,7 +13,7 @@ enum CompactStringType {
   String = 3,
 }
 
-type BinaryRuntimeValue = number | string | Date | object | undefined;
+type BinaryRuntimeValue = number | string | Date | object | null | undefined;
 type BinaryRuntimeRecord = Record<string | symbol, BinaryRuntimeValue>;
 
 class BinaryReader {
@@ -172,7 +172,7 @@ function readCompactString(reader: BinaryReader): string | undefined {
   }
 }
 
-function encodeField(
+function encodeFieldValue(
   value: BinaryRuntimeValue,
   field: BinaryFieldMetadata,
 ): Buffer | undefined {
@@ -197,6 +197,22 @@ function encodeField(
   }
 }
 
+function encodeField(
+  value: BinaryRuntimeValue,
+  field: BinaryFieldMetadata,
+): Buffer | undefined {
+  if (field.nullable) {
+    if (value === null || value === undefined) {
+      return Buffer.from([0x00]);
+    }
+    const encoded = encodeFieldValue(value, field);
+    if (!encoded) return undefined;
+    return Buffer.concat([Buffer.from([0x01]), encoded]);
+  }
+
+  return encodeFieldValue(value, field);
+}
+
 function encodeObject<T extends object>(
   data: T,
   schema: BinarySchema<T>,
@@ -218,7 +234,7 @@ function encodeObject<T extends object>(
   return Buffer.concat(encodedFields);
 }
 
-function decodeField(
+function decodeFieldValue(
   reader: BinaryReader,
   field: BinaryFieldMetadata,
 ): BinaryRuntimeValue {
@@ -234,6 +250,20 @@ function decodeField(
     case 'object':
       return decodeObject(reader, field.classFactory());
   }
+}
+
+function decodeField(
+  reader: BinaryReader,
+  field: BinaryFieldMetadata,
+): BinaryRuntimeValue {
+  if (field.nullable) {
+    const flag = reader.readUInt8();
+    if (flag === 0x00) return null;
+    if (flag === 0x01) return decodeFieldValue(reader, field);
+    return undefined;
+  }
+
+  return decodeFieldValue(reader, field);
 }
 
 function decodeObject<T extends object>(

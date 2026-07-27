@@ -159,4 +159,110 @@ describe('binary codec library', () => {
       bigIntSpy.mockRestore();
     }
   });
+
+  it('supports nullable scalar and object fields', () => {
+    class NullableSubObject {
+      @BinaryUInt32({ nullable: true })
+      num?: number | null | undefined;
+    }
+
+    class NullablePayload {
+      @BinaryUInt32({ nullable: true })
+      age?: number | null | undefined;
+
+      @BinaryCompactString({ nullable: true })
+      name?: string | null | undefined;
+
+      @BinaryDate({ nullable: true })
+      birthDate?: Date | null | undefined;
+
+      @BinaryUuid({ nullable: true })
+      id?: string | null | undefined;
+
+      @BinaryObject(() => NullableSubObject, { nullable: true })
+      sub?: NullableSubObject | null | undefined;
+    }
+
+    // 1. All fields null
+    const nullPayload: NullablePayload = {
+      age: null,
+      name: null,
+      birthDate: null,
+      id: null,
+      sub: null,
+    };
+    const encodedNull = encodeBinary(nullPayload, NullablePayload);
+    expect(encodedNull).toHaveLength(5); // 5 fields * 1 byte (0x00)
+    expect(decodeBinary(encodedNull as Buffer, NullablePayload)).toEqual({
+      age: null,
+      name: null,
+      birthDate: null,
+      id: null,
+      sub: null,
+    });
+
+    // 2. All fields undefined
+    const undefinedPayload: NullablePayload = {};
+    const encodedUndefined = encodeBinary(undefinedPayload, NullablePayload);
+    expect(encodedUndefined).toHaveLength(5);
+    expect(decodeBinary(encodedUndefined as Buffer, NullablePayload)).toEqual({
+      age: null,
+      name: null,
+      birthDate: null,
+      id: null,
+      sub: null,
+    });
+
+    // 3. All fields present
+    const date = new Date('2026-07-27T00:00:00.000Z');
+    const presentPayload: NullablePayload = {
+      age: 25,
+      name: 'Alice',
+      birthDate: date,
+      id: UUID,
+      sub: { num: 100 },
+    };
+    const encodedPresent = encodeBinary(presentPayload, NullablePayload);
+    // age: 1 + 4 = 5
+    // name: 1 + 2 + 5 = 8
+    // birthDate: 1 + 8 = 9
+    // id: 1 + 16 = 17
+    // sub: 1 + (1 + 4) = 6
+    // Total = 5 + 8 + 9 + 17 + 6 = 45 bytes
+    expect(encodedPresent).toHaveLength(45);
+    const decodedPresent = decodeBinary(encodedPresent as Buffer, NullablePayload);
+    expect(decodedPresent).toEqual({
+      age: 25,
+      name: 'Alice',
+      birthDate: date,
+      id: UUID,
+      sub: { num: 100 },
+    });
+
+    // 4. Partial fields (some fields present, some null or undefined)
+    const partialPayload: NullablePayload = {
+      age: 30,
+      name: null,
+      birthDate: date,
+      id: undefined,
+      sub: { num: null },
+    };
+    const encodedPartial = encodeBinary(partialPayload, NullablePayload);
+    // age: 1 + 4 = 5 bytes (0x01 + uint32)
+    // name: 1 byte (0x00)
+    // birthDate: 1 + 8 = 9 bytes (0x01 + uint64 date)
+    // id: 1 byte (0x00)
+    // sub: 1 + (1) = 2 bytes (0x01 + sub-object with 0x00 num)
+    // Total = 5 + 1 + 9 + 1 + 2 = 18 bytes
+    expect(encodedPartial).toHaveLength(18);
+    const decodedPartial = decodeBinary(encodedPartial as Buffer, NullablePayload);
+    expect(decodedPartial).toEqual({
+      age: 30,
+      name: null,
+      birthDate: date,
+      id: null,
+      sub: { num: null },
+    });
+  });
 });
+
